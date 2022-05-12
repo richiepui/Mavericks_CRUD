@@ -3,10 +3,9 @@ import {EmployeeDef, Department} from '../model/employee'
 const {employeeSchema} = require('../model/empValidation')
 import {pool} from '../database'
 
-
 const Emp: EmployeeDef[] = [];
 
-export const createEmployees: RequestHandler = (req,res,next) => {
+export const createEmployees: RequestHandler = async (req,res,next) => {
     const body = req.body;
     const{error} = employeeSchema.validate(body);
     if(error){
@@ -16,14 +15,18 @@ export const createEmployees: RequestHandler = (req,res,next) => {
         const name  = (req.body as{name:string}).name;
         const salary = (req.body as{salary:number}).salary;
         const department = (req.body as{department:Department}).department;
-        var newEmployeeId = Emp.length;
-        var searchid = Emp.findIndex(employee => employee.id === newEmployeeId);
-        if(!(searchid < 0)){
-            newEmployeeId = Math.random();
+
+        const query = await pool.query('select * from employees');
+        const queryCount = query.rowCount;
+        var newId = queryCount;
+        const response = await pool.query('select * from employees where employee_id = $1',[newId]);
+        if (response.rows.length > 0){
+            newId = Math.floor(Math.random()*1000);
         }
-        const newEmployee = new EmployeeDef(newEmployeeId, name, salary,department);
-        Emp.push(newEmployee);
-        res.status(200).json({message: 'Employee Created Successfully', employeeCreated: newEmployee});
+        const newEmp = new EmployeeDef(newId,name,salary,department);
+        await pool.query('INSERT INTO employees (employee_id, employee_name, employee_salary, employee_department) VALUES($1,$2,$3,$4)'
+        ,[newEmp.id,newEmp.name,newEmp.salary,newEmp.department]);
+        res.status(200).json({message:'Employee Created Successfully', employeeCreated: newEmp});
     }
 };
 
@@ -43,8 +46,8 @@ export const getEmployees:  RequestHandler = async (req,res,next)=>{
     res.status(200).json(response.rows);
 }
 
-//This is to specify the id as type of string
-export const updateEmployee: RequestHandler<{id:string}> = (req, res,next) =>{
+
+export const updateEmployee: RequestHandler<{id:string}> = async(req, res,next) =>{
     const body = req.body;
     const{error} = employeeSchema.validate(body);
     if(error){
@@ -55,21 +58,25 @@ export const updateEmployee: RequestHandler<{id:string}> = (req, res,next) =>{
         const upSalary = (req.body as {salary:number}).salary;
         const upDepartment = (req.body as {department:Department}).department;
         const inputEmpId = +req.params.id;
-        const findEmployee = Emp.findIndex(employee=> employee.id === inputEmpId);
-        if(findEmployee < 0){
-            res.status(404).json({message:'Employee could not be found'});
+        const response = await pool.query('SELECT * from employees where employee_id = $1', [inputEmpId]);
+        if (!response.rows.length){
+            res.status(404).json({message: 'Employee could not be found'});
         }
         else{
-            const cur = Emp[findEmployee];
-            if(cur.name == upName && cur.salary == upSalary && cur.department == upDepartment){
-                res.status(304).json({message:'No Change has been made'});
-            }
-            else{
-                Emp[findEmployee] = new EmployeeDef(Emp[findEmployee].id, upName, upSalary,upDepartment);
-                res.status(200).json({message:'Employee Details Updated!' , employee: Emp[findEmployee]});
-            }
-
+            const empMap = pool.map('SELECT * from employees where employee_id =$1', [inputEmpId]);
         }
+
+        // else{
+        //     const cur = Emp[findEmployee];
+        //     if(cur.name == upName && cur.salary == upSalary && cur.department == upDepartment){
+        //         res.status(304).json({message:'No Change has been made'});
+        //     }
+        //     else{
+        //         Emp[findEmployee] = new EmployeeDef(Emp[findEmployee].id, upName, upSalary,upDepartment);
+        //         res.status(200).json({message:'Employee Details Updated!' , employee: Emp[findEmployee]});
+        //     }
+
+        // }
     }
 };
 
