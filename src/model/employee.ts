@@ -1,5 +1,7 @@
-import {Table, Model, Column, DataType} from 'sequelize-typescript';
+import {DataType} from 'sequelize-typescript';
+import connection from '../database'
 
+//This is a basic model used for validation before inserting/updating into database
 export class EmployeeDef{
     constructor(
         public id: number, 
@@ -15,35 +17,11 @@ export enum Department{
 };
 
 
-@Table({
-    timestamps:false,
-    tableName:"employees"
-})
-
-export class Employees extends Model{
-    @Column({
-        type: DataType.NUMBER,
-        primaryKey:true,
-        allowNull: false
-    })
-    id!: number;
-
-    @Column({
-        type: DataType.STRING,
-        allowNull: false
-    })
-    name!: string;
-
-    @Column({
-        type:DataType.NUMBER,
-        allowNull:false
-    })
-    salary!: number;
-
-    @Column({
-        type: DataType.STRING,
-        allowNull:false
-    })
-    department!: string;
-}
-
+//Sequelization Definition for Inserting into the database.
+const seq = connection;
+export const Employees = seq.define('Employee',{
+    //Model Attributes
+    id:{type: DataType.NUMBER,primaryKey: true, allowNull:false},
+    name:{type: DataType.STRING,allowNull:false},
+    salary:{type: DataType.NUMBER,allowNull:false},
+    department:{type: DataType.STRING,allowNull:false}},{tableName:'employees',timestamps:false});

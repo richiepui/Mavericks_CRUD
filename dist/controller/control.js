@@ -49,7 +49,6 @@ const getEmployees = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
     res.status(200).json(query);
 });
 exports.getEmployees = getEmployees;
-//Successful, No Change, Bad Request, Cannot be found
 const updateEmployee = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
     const { error } = employeeSchema.validate(body);
@@ -67,6 +66,7 @@ const updateEmployee = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         }
         else {
             const ret = query.toJSON();
+            console.log(ret);
             if (upName == ret.name && upSalary == ret.salary && upDepartment == ret.department) {
                 res.status(304).json({ message: "No Change has been made" });
             }

@@ -1,5 +1,4 @@
 import { Sequelize } from 'sequelize-typescript'
-import {Employees} from './model/employee'
 
 const connection = new Sequelize({
     dialect: "postgres",
@@ -7,7 +6,6 @@ const connection = new Sequelize({
     username:"postgres",
     password:"cf090303",
     database:"Mavericks",
-    models: [Employees],
     port: 5432
 })
 

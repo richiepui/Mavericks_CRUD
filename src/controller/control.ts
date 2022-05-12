@@ -40,7 +40,7 @@ export const getEmployees:  RequestHandler = async (req,res,next)=>{
     res.status(200).json(query);
 }
 
-//Successful, No Change, Bad Request, Cannot be found
+
 export const updateEmployee: RequestHandler<{id:string}> = async(req, res,next) =>{
     const body = req.body;
     const{error} = employeeSchema.validate(body);
@@ -58,6 +58,7 @@ export const updateEmployee: RequestHandler<{id:string}> = async(req, res,next) 
         }
         else{
             const ret: EmployeeDef = query.toJSON();
+            console.log(ret)
             if(upName == ret.name && upSalary == ret.salary && upDepartment == ret.department ){
                 res.status(304).json({message:"No Change has been made"});
             }
