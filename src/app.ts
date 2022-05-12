@@ -1,6 +1,7 @@
 import express, {Request, Response, NextFunction} from 'express'
 import route from './routes/route';
 import {json} from 'body-parser';
+import connection from './database'
 
 const app = express();
 
@@ -11,6 +12,13 @@ app.use('/employee', route);
 app.use((err:Error,req:express.Request,res: Response,next: NextFunction)=>{
     res.status(500).json({message:err.message});
 });
+
+connection.sync().then(() => {
+    console.log("Database synced successfully");
+}).catch((error)=>{
+    console.log("Error: ", error);
+});
+
 
 app.listen(3000);
 

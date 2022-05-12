@@ -12,8 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteEmployee = exports.updateEmployee = exports.getEmployees = exports.getEmployeeById = exports.createEmployees = void 0;
 const employee_1 = require("../model/employee");
 const { employeeSchema } = require('../model/empValidation');
-const database_1 = require("../database");
-const Emp = [];
 const createEmployees = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
     const { error } = employeeSchema.validate(body);
@@ -24,35 +22,34 @@ const createEmployees = (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         const name = req.body.name;
         const salary = req.body.salary;
         const department = req.body.department;
-        const query = yield database_1.pool.query('select * from employees');
-        const queryCount = query.rowCount;
-        var newId = queryCount;
-        const response = yield database_1.pool.query('select * from employees where employee_id = $1', [newId]);
-        if (response.rows.length > 0) {
-            newId = Math.floor(Math.random() * 1000);
+        var id = yield employee_1.Employees.count();
+        const query = yield employee_1.Employees.findByPk(id);
+        if (query) {
+            id = Math.floor(Math.random() * 1000);
         }
-        const newEmp = new employee_1.EmployeeDef(newId, name, salary, department);
-        yield database_1.pool.query('INSERT INTO employees (employee_id, employee_name, employee_salary, employee_department) VALUES($1,$2,$3,$4)', [newEmp.id, newEmp.name, newEmp.salary, newEmp.department]);
-        res.status(200).json({ message: 'Employee Created Successfully', employeeCreated: newEmp });
+        const result = yield employee_1.Employees.create({ id: id, name: name, salary: salary, department: department });
+        console.log(result);
+        res.status(200).json({ message: "Employeed Created Successfully", employeeCreated: result });
     }
 });
 exports.createEmployees = createEmployees;
 const getEmployeeById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const inputEmpId = +req.params.id;
-    const response = yield database_1.pool.query('SELECT * from employees where employee_id = $1', [inputEmpId]);
-    if (!response.rows.length) {
+    const query = yield employee_1.Employees.findByPk(inputEmpId);
+    if (!query) {
         res.status(404).json({ message: "Employee could not be found" });
     }
     else {
-        res.status(200).json({ message: "Employee Found", employee: response.rows });
+        res.status(200).json({ message: "Employee Found", employee: query });
     }
 });
 exports.getEmployeeById = getEmployeeById;
 const getEmployees = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield database_1.pool.query('Select * from employees');
-    res.status(200).json(response.rows);
+    const query = yield employee_1.Employees.findAll();
+    res.status(200).json(query);
 });
 exports.getEmployees = getEmployees;
+//Successful, No Change, Bad Request, Cannot be found
 const updateEmployee = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
     const { error } = employeeSchema.validate(body);
@@ -60,39 +57,37 @@ const updateEmployee = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         res.status(400).json({ message: error.details[0].message });
     }
     else {
+        const inputEmpId = +req.params.id;
         const upName = req.body.name;
         const upSalary = req.body.salary;
         const upDepartment = req.body.department;
-        const inputEmpId = +req.params.id;
-        const response = yield database_1.pool.query('SELECT * from employees where employee_id = $1', [inputEmpId]);
-        if (!response.rows.length) {
+        const query = yield employee_1.Employees.findByPk(inputEmpId);
+        if (!query) {
             res.status(404).json({ message: 'Employee could not be found' });
         }
         else {
-            const empMap = database_1.pool.map('SELECT * from employees where employee_id =$1', [inputEmpId]);
+            const ret = query.toJSON();
+            if (upName == ret.name && upSalary == ret.salary && upDepartment == ret.department) {
+                res.status(304).json({ message: "No Change has been made" });
+            }
+            else {
+                employee_1.Employees.update({ name: upName, salary: upSalary, department: upDepartment }, { where: { id: inputEmpId } });
+                const newDetails = new employee_1.EmployeeDef(inputEmpId, upName, upSalary, upDepartment);
+                res.status(200).json({ message: "Employee Details Updated", newEmpDetails: newDetails });
+            }
         }
-        // else{
-        //     const cur = Emp[findEmployee];
-        //     if(cur.name == upName && cur.salary == upSalary && cur.department == upDepartment){
-        //         res.status(304).json({message:'No Change has been made'});
-        //     }
-        //     else{
-        //         Emp[findEmployee] = new EmployeeDef(Emp[findEmployee].id, upName, upSalary,upDepartment);
-        //         res.status(200).json({message:'Employee Details Updated!' , employee: Emp[findEmployee]});
-        //     }
-        // }
     }
 });
 exports.updateEmployee = updateEmployee;
 const deleteEmployee = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const inputEmpId = +req.params.id;
-    const response = yield database_1.pool.query('SELECT * from employees where employee_id = $1', [inputEmpId]);
-    if (!response.rows) {
+    const query = yield employee_1.Employees.findByPk(inputEmpId);
+    if (!query) {
         res.status(404).json({ message: "Employee could not be found" });
     }
     else {
-        yield database_1.pool.query('DELETE from employees where employee_id = $1', [inputEmpId]);
-        res.status(200).json({ message: "Employee is deleted", deleted: response.rows });
+        yield employee_1.Employees.destroy({ where: { id: inputEmpId } });
+        res.status(200).json({ message: "Employee is deleted", deleted: query });
     }
 });
 exports.deleteEmployee = deleteEmployee;
