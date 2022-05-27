@@ -8,6 +8,8 @@ const route_1 = __importDefault(require("./routes/route"));
 const body_parser_1 = require("body-parser");
 const database_1 = __importDefault(require("./database"));
 const app = (0, express_1.default)();
+const cors = require("cors");
+app.use(cors());
 app.use((0, body_parser_1.json)());
 app.use('/employee', route_1.default);
 //Set up Middleware to deal with errors, in the case that IDs cannot be found;
@@ -19,7 +21,8 @@ database_1.default.sync().then(() => {
 }).catch((error) => {
     console.log("Error: ", error);
 });
-app.listen(3000);
+app.set('port', 8080);
+app.listen(app.get('port'));
 //To take note for setting up project
 //Run npm init
 //Run tsc --init

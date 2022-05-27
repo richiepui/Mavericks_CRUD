@@ -1,9 +1,13 @@
 import express, {Request, Response, NextFunction} from 'express'
+import * as http from 'http'; 
 import route from './routes/route';
 import {json} from 'body-parser';
 import connection from './database'
 
+
 const app = express();
+const cors = require("cors");
+app.use(cors());
 
 app.use(json());
 app.use('/employee', route);
@@ -19,8 +23,8 @@ connection.sync().then(() => {
     console.log("Error: ", error);
 });
 
-
-app.listen(3000);
+app.set('port',8080);
+app.listen(app.get('port'));
 
 
 //To take note for setting up project
