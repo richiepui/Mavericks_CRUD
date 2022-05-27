@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "cf090303",
+    "database": "Mavericks",
+    "host": "employee-rest-api",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "postgres",
+    "password": "cf090303",
+    "database": "Mavericks",
+    "host": "localhost",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "postgres",
+    "password": "cf090303",
+    "database": "Mavericks",
+    "host": "localhost",
+    "dialect": "postgres"
+  }
+}

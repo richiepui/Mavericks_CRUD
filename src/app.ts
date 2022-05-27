@@ -1,5 +1,4 @@
 import express, {Request, Response, NextFunction} from 'express'
-import * as http from 'http'; 
 import route from './routes/route';
 import {json} from 'body-parser';
 import connection from './database'
