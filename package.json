@@ -7,9 +7,8 @@
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && npx sequelize db:migrate && nodemon dist/app.js",
-    "migrate": "npx sequelize-cli db:migrate --migrations-path dist/migrations",
-    "undoMigrate": "npx sequelize-cli db:migrate:undo --migrations-path dist/migrations",
-    "genMigrate": "npx sequelize-cli seed:generate --seeders-path src/migrations"
+    "migrate": "npx sequelize-cli db:migrate",
+    "undoMigrate": "npx sequelize-cli db:migrate:undo"
   },
   "author": "",
   "license": "ISC",
