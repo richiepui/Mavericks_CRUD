@@ -2,10 +2,10 @@ import { Sequelize } from 'sequelize-typescript'
 
 const connection = new Sequelize({
     dialect: "postgres",
-    host: "localhost",
+    host: "db",
     username:"postgres",
-    password:"cf090303",
-    database:"Mavericks",
+    password:"postgres",
+    database:"postgres",
     port: 5432
 })
 
