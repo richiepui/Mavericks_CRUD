@@ -1,23 +1,23 @@
 {
   "development": {
     "username": "postgres",
-    "password": "cf090303",
-    "database": "Mavericks",
-    "host": "employee-rest-api",
+    "password": "postgres",
+    "database": "postgres",
+    "host": "db",           
     "dialect": "postgres"
   },
   "test": {
     "username": "postgres",
-    "password": "cf090303",
-    "database": "Mavericks",
-    "host": "localhost",
+    "password": "postgres",
+    "database": "postgres",
+    "host": "postgres",
     "dialect": "postgres"
   },
   "production": {
     "username": "postgres",
-    "password": "cf090303",
-    "database": "Mavericks",
-    "host": "localhost",
+    "password": "postgres",
+    "database": "postgres",
+    "host": "postgres",
     "dialect": "postgres"
   }
 }
