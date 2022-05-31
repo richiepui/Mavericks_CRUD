@@ -1,4 +1,4 @@
-import {Department} from '../model/employee'
+import {Department} from './employeeModel'
 
 const Joi = require('joi');
 
@@ -10,6 +10,4 @@ const employeeSchema =  Joi.object({
     department: Joi.string().valid(dept.HR,dept.PS).required()
 });
 
-module.exports ={
-    employeeSchema
-}   
+export default employeeSchema

@@ -2,6 +2,7 @@ import express, {Request, Response, NextFunction} from 'express'
 import route from './routes/route';
 import {json} from 'body-parser';
 import connection from './database'
+require("dotenv").config();
 
 
 const app = express();

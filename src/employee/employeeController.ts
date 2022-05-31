@@ -1,12 +1,12 @@
 import {RequestHandler} from 'express';
-import {EmployeeDef, Department, Employees} from '../model/employee'
-const {employeeSchema} = require('../model/empValidation')
+import {EmployeeDef, Department, Employees} from './employeeModel'
+import employeeSchema from './empValidation'
 
 export const createEmployees: RequestHandler = async (req,res,next) => {
     const body = req.body;
     const{error} = employeeSchema.validate(body);
     if(error){
-        res.status(400).json({message: error.details[0].message});
+        res.status(400).json({message: error.details[0].message, requestState: 0});
         return;
     }
     const name = (req.body as{name:string}).name;
@@ -17,9 +17,8 @@ export const createEmployees: RequestHandler = async (req,res,next) => {
     if(query){
         id = Math.floor(Math.random()*1000);
     }
-    const result = await Employees.create({id: id, name: name, salary: salary, department: department});
-    console.log(result);
-    res.status(200).json({message:"Employeed Created Successfully", employeeCreated: result});
+    await Employees.create({name:name, salary:salary,department:department});
+    res.status(200).json({message:"Employeed Created Successfully", requestState: 1});
 };
 
 export const getEmployeeById: RequestHandler<{id:string}>= async(req,res,next)=>{
@@ -34,7 +33,7 @@ export const getEmployeeById: RequestHandler<{id:string}>= async(req,res,next)=>
 }
 
 export const getEmployees:  RequestHandler = async (req,res,next)=>{
-    const query = await Employees.findAll(({order:[['id','ASC']]}));
+    const query =  await Employees.findAll({ order: [["id", "ASC"]] });
     res.status(200).json(query);
 }
 
@@ -43,7 +42,7 @@ export const updateEmployee: RequestHandler<{id:string}> = async(req, res,next) 
     const body = req.body;
     const{error} = employeeSchema.validate(body);
     if(error){
-        res.status(400).json(error.details[0].message);
+        res.status(400).json({message: error.details[0].message, requestState: 0});
         return;
     }
     const inputEmpId = +req.params.id;
@@ -52,30 +51,26 @@ export const updateEmployee: RequestHandler<{id:string}> = async(req, res,next) 
     const upDepartment = (req.body as {department:Department}).department;
     const query = await Employees.findByPk(inputEmpId);
     if(!query){
-        res.status(404).json({message:'Employee could not be found'});
+        res.status(404).json({message:'Employee could not be found', requestState: 0});
         return;
     }
-    const ret: EmployeeDef = query.toJSON();
+    const ret : EmployeeDef = query.toJSON();
     if(upName == ret.name && upSalary == ret.salary && upDepartment == ret.department ){
-        res.status(304).json({message:"No Change has been made"});
+        res.status(304).json({message:"No Change has been made", requestState: 1});
     }
     else{
-        Employees.update({name:upName,salary:upSalary,department:upDepartment},{where:{id:inputEmpId}});
-        const newDetails = new EmployeeDef(inputEmpId,upName,upSalary,upDepartment);
-        res.status(200).json({message:"Employee Details Updated", newEmpDetails: newDetails});
+        await Employees.update({name:upName,salary:upSalary,department:upDepartment},{where:{id:inputEmpId}});
+        res.status(200).json({message:"Employee Details Updated", requestState: 1});
     }
-    
-    
 };
 
 export const deleteEmployee: RequestHandler<{id:string}> =  async(req,res,next) =>{
     const inputEmpId = +req.params.id;
-    const query = await Employees.findByPk(inputEmpId);
+    const query = Employees.findByPk(inputEmpId);
     if(!query){
         res.status(404).json({message:"Employee could not be found"});
         return;
     }
     await Employees.destroy({where:{id:inputEmpId}});
     res.status(200).json({message:"Employee is deleted", deleted: query});
-
 };

@@ -1,7 +1,5 @@
 'use strict';
 
-// import { QueryInterface } from "sequelize";
-// import { Sequelize, DataType} from "sequelize-typescript";
 
 module.exports = {
   async up (queryInterface, Sequelize) {
