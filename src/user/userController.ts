@@ -3,6 +3,7 @@ import { User, Users } from "./userModel";
 import userSchema from "./userValidation";
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const config = process.env;
 
 export const registerUser: RequestHandler = async(req, res, next) => {
   const body = req.body;
@@ -24,6 +25,19 @@ export const registerUser: RequestHandler = async(req, res, next) => {
   return;
 }
 
+export const verifyJwt: RequestHandler = (req, res, next)=>{
+  const token = req.body.token;
+  if(!token){
+    return res.status(403).json("A token is required for authentication");
+  }
+  try{
+    const decoded = jwt.verify(token, config.TOKEN_KEY)
+    res.json({auth:true, message:"Successfully authenticated"});
+  }catch(err){
+    return res.status(400).json({auth:false, message: "Invalid Token"});
+  }
+}
+
 export const verifyUser: RequestHandler = async (req, res, next) => {
   try {
     const body = req.body;
@@ -43,7 +57,7 @@ export const verifyUser: RequestHandler = async (req, res, next) => {
           expiresIn: "24h",
         }
       );
-      res.status(200).json({token, requestState: 1});
+      res.status(200).json({message:"Successfully Logged In", token:token, requestState: 1});
       return
     }
     res.status(400).json({message:"Invalid Credentials", requestState:0});
